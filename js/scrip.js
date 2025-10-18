@@ -3,7 +3,7 @@ const API_BASE = 'local'; // Simulado; en real, sería una URL como 'https://api
 
 // Credenciales simuladas (hash simple para demo; usa bcrypt en producción).
 const USERS = {
-    'admin': '5f4dcc3b5aa765d61d8327deb882cf99' // MD5 de 'password' (no seguro, solo demo)
+    'admin': 'cGFzc3dvcmQ=' // Base64 de 'password' (usando btoa para consistencia)
 };
 
 // Función para sanitizar entrada y prevenir XSS.
