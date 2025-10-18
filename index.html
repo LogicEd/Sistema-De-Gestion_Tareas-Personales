@@ -2,26 +2,38 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Sistema de Tareas</title>
-    <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Tareas</title>
+    <link rel="stylesheet" href="styles.css">  <!-- Enlace al CSS separado -->
 </head>
 <body>
-    <div id="auth" class="container">
-        <h2>Login</h2>
-        <input type="text" id="username" placeholder="Usuario">
-        <input type="password" id="password" placeholder="Contraseña">
-        <button onclick="login()">Iniciar Sesión</button>
+    <div class="container">
+        <div id="auth" class="auth show">
+            <h2>Login</h2>
+            <input type="text" id="username" placeholder="Usuario">
+            <input type="password" id="password" placeholder="Contraseña">
+            <button id="login-btn">Iniciar Sesión</button>
+            <button id="register-btn">Registrarse</button>
+        </div>
+        <div id="app" style="display: none;">
+            <h1>Gestión de Tareas</h1>
+            <div class="task-form">
+                <input type="text" id="task-input" placeholder="Nueva tarea">
+                <input type="text" id="category-input" placeholder="Categoría">
+                <input type="date" id="due-date-input">
+                <button id="add-task">Agregar</button>
+            </div>
+            <div class="filters">
+                <input type="text" id="search-input" placeholder="Buscar tareas">
+                <select id="filter-category">
+                    <option value="">Todas las categorías</option>
+                </select>
+                <button id="logout-btn">Cerrar Sesión</button>
+            </div>
+            <ul id="task-list"></ul>
+        </div>
     </div>
-    <div id="app" class="hidden container">
-        <h1>Gestión de Tareas</h1>
-        <form id="taskForm">
-            <input type="text" id="title" placeholder="Título" required>
-            <textarea id="description" placeholder="Descripción"></textarea>
-            <input type="date" id="dueDate">
-            <button type="submit">Agregar Tarea</button>
-        </form>
-        <ul id="taskList"></ul>
-    </div>
-    <script src="script.js"></script>
+
+    <script src="script.js"></script>  <!-- Enlace al JS separado -->
 </body>
 </html>
