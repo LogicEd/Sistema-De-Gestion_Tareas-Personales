@@ -1,55 +1,100 @@
-// Función para sanitizar entrada y prevenir XSS.
-function sanitizeInput(input) {
-    return input.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+// Simulación de autenticación (usuario: admin, contraseña: admin)
+function login() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    // Hash simple para simular seguridad (en producción, usa bcrypt)
+    const hashedPass = btoa(password); // Base64 simple; reemplaza con CryptoJS
+    if (username === 'admin' && hashedPass === btoa('admin')) {
+        localStorage.setItem('session', 'loggedIn');
+        document.getElementById('auth').classList.add('hidden');
+        document.getElementById('app').classList.remove('hidden');
+        loadTasks();
+    } else {
+        alert('Credenciales incorrectas');
+    }
 }
 
-// Cargar tareas desde localStorage al iniciar.
-loadTasks();
+// Verificar sesión al cargar
+if (localStorage.getItem('session') === 'loggedIn') {
+    document.getElementById('auth').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    loadTasks();
+}
 
-// Cargar tareas desde localStorage.
+// API simulada con localStorage
+function getTasks() {
+    return JSON.parse(localStorage.getItem('tasks') || '[]');
+}
+
+function saveTasks(tasks) {
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+// CRUD: Leer tareas
 function loadTasks() {
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-    const taskList = document.getElementById('task-list');
-    taskList.innerHTML = '';
+    const tasks = getTasks();
+    const list = document.getElementById('taskList');
+    list.innerHTML = '';
     tasks.forEach((task, index) => {
         const li = document.createElement('li');
         li.innerHTML = `
-            <span class="${task.completed ? 'completed' : ''}">${sanitizeInput(task.text)}</span>
             <div>
-                <button onclick="toggleTask(${index})">${task.completed ? 'Desmarcar' : 'Completar'}</button>
+                <strong>${task.title}</strong> - ${task.description} (Vence: ${task.dueDate})
+            </div>
+            <div>
+                <button onclick="editTask(${index})">Editar</button>
                 <button onclick="deleteTask(${index})">Eliminar</button>
             </div>
         `;
-        taskList.appendChild(li);
+        list.appendChild(li);
     });
 }
 
-// Agregar tarea.
-document.getElementById('task-form').addEventListener('submit', function(e) {
+// CRUD: Crear tarea
+document.getElementById('taskForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    const taskInput = document.getElementById('task-input');
-    const taskText = sanitizeInput(taskInput.value.trim());
-    if (taskText) {
-        const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-        tasks.push({ text: taskText, completed: false });
-        localStorage.setItem('tasks', JSON.stringify(tasks));
-        taskInput.value = '';
-        loadTasks();
-    }
+    const title = document.getElementById('title').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const dueDate = document.getElementById('dueDate').value;
+    
+    // Validación básica para prevenir XSS (sanitización simple)
+    if (!title) return alert('Título requerido');
+    const sanitizedTitle = title.replace(/<script[^>]*>.*?<\/script>/gi, ''); // Básico; usa DOMPurify en producción
+    const sanitizedDesc = description.replace(/<script[^>]*>.*?<\/script>/gi, '');
+    
+    const tasks = getTasks();
+    tasks.push({ title: sanitizedTitle, description: sanitizedDesc, dueDate });
+    saveTasks(tasks);
+    loadTasks();
+    this.reset();
 });
 
-// Alternar estado de tarea.
-function toggleTask(index) {
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-    tasks[index].completed = !tasks[index].completed;
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-    loadTasks();
+// CRUD: Actualizar tarea
+function editTask(index) {
+    const tasks = getTasks();
+    const task = tasks[index];
+    document.getElementById('title').value = task.title;
+    document.getElementById('description').value = task.description;
+    document.getElementById('dueDate').value = task.dueDate;
+    // Para simplificar, reutiliza el formulario de creación; en producción, separa
+    document.getElementById('taskForm').onsubmit = function(e) {
+        e.preventDefault();
+        task.title = document.getElementById('title').value.trim();
+        task.description = document.getElementById('description').value.trim();
+        task.dueDate = document.getElementById('dueDate').value;
+        saveTasks(tasks);
+        loadTasks();
+        this.reset();
+        this.onsubmit = null; // Resetear
+    };
 }
 
-// Eliminar tarea.
+// CRUD: Eliminar tarea
 function deleteTask(index) {
-    const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-    tasks.splice(index, 1);
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-    loadTasks();
+    if (confirm('¿Eliminar tarea?')) {
+        const tasks = getTasks();
+        tasks.splice(index, 1);
+        saveTasks(tasks);
+        loadTasks();
+    }
 }
